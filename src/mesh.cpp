@@ -7,6 +7,7 @@
 //
 
 #include <enginimus/mesh.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures) {
     this->vertices = vertices;
@@ -47,7 +48,7 @@ void Mesh::setupMesh() {
     glBindVertexArray(0);
 }
 
-void Mesh::draw(Shader shader) const {
+void Mesh::draw(Shader shader, glm::mat4 model) const {
     GLuint diffuseNr = 1;
     GLuint specularNr = 1;
     
@@ -60,10 +61,10 @@ void Mesh::draw(Shader shader) const {
         glUniform1i(glGetUniformLocation(shader.program, ("material." + name + number).c_str()), i);
         glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
     }
-    
     glActiveTexture(GL_TEXTURE0);
     
     // Draw mesh
+    glUniformMatrix4fv(glGetUniformLocation(shader.program, "model"), 1, GL_FALSE, glm::value_ptr(model));
     glBindVertexArray(this->VAO);
     glDrawElements(GL_TRIANGLES, (uint)this->indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

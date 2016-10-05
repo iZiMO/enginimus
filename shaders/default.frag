@@ -14,5 +14,5 @@ uniform Material material;
 
 void main()
 {
-    color = mix(texture(material.textureDiffuse1, TexCoord), texture(material.textureDiffuse2, TexCoord), 0.5);
+    color = texture(material.textureDiffuse1, TexCoord);
 }

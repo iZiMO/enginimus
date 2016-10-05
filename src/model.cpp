@@ -8,20 +8,19 @@
 
 #include <enginimus/model.hpp>
 #include <enginimus/util.hpp>
-#include <iostream>
 
 using namespace std;
 
 void Model::draw(Shader shader) {
     for(GLuint i = 0; i < this->meshes.size(); i++) {
-        this->meshes[i].draw(shader);
+        this->meshes[i].draw(shader, this->model);
     }
 }
 
 void Model::loadModel(string path) {
     // TODO process model to remove duplicate vertices
     Assimp::Importer import;
-    const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
     
     if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         cout << "ERROR::ASSIMP::" << import.GetErrorString() << endl;
@@ -46,14 +45,17 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 }
 
 Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
+    cout << "Processing mesh " << mesh->mName.C_Str() << endl;
     vector<Vertex> vertices;
     vector<GLuint> indices;
     vector<Texture> textures;
-    
+
+    cout << "  vertices: " << mesh->mNumVertices << endl;
     for(GLuint i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
         // Process vertex positions, normals and texture coordinates
         vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+
         vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
         
         glm::vec2 vec;
@@ -68,6 +70,8 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
         
         vertices.push_back(vertex);
     }
+
+    cout << "  faces: " << mesh->mNumFaces << endl;
     // Process indices
     for(GLuint i = 0; i < mesh->mNumFaces; i++) {
         aiFace face = mesh->mFaces[i];
@@ -79,6 +83,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     // Process material
     //if(mesh->mMaterialIndex >= 0) {
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+    cout << "  loading material " << mesh->mMaterialIndex << endl;
     vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, TEXTURE_TYPE_DIFFUSE);
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
     vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, TEXTURE_TYPE_SPECULAR);
@@ -93,6 +98,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
     for(GLuint i = 0; i < mat->GetTextureCount(type); i++) {
         aiString str;
         mat->GetTexture(type, i, &str);
+        cout << "    " << typeName << " - " << str.C_Str() << endl;
         GLboolean textureLoaded = false;
         
         // see if we've already loaded this texture
@@ -116,7 +122,5 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
     }
     return materialTextures;
 }
-
-
 
 
