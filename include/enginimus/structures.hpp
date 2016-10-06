@@ -26,7 +26,7 @@ struct Vertex {
 };
 
 struct Texture {
-    GLuint id;
+    GLint id;
     string type; // diffuse / specular?
     aiString path;
 };

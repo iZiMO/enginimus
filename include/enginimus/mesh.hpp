@@ -24,7 +24,7 @@ public:
     vector<Texture> textures;
     /*  Functions  */
     Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures);
-    void draw(Shader shader, glm::mat4 model) const;
+    void render(Shader shader, glm::mat4 model) const;
 private:
     /*  Render data  */
     GLuint VAO, VBO, EBO;

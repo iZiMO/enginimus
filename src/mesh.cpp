@@ -48,7 +48,7 @@ void Mesh::setupMesh() {
     glBindVertexArray(0);
 }
 
-void Mesh::draw(Shader shader, glm::mat4 model) const {
+void Mesh::render(Shader shader, glm::mat4 model) const {
     GLuint diffuseNr = 1;
     GLuint specularNr = 1;
     

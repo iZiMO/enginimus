@@ -5,8 +5,8 @@
 //  Copyright © 2016 Joel Schmidt. All rights reserved.
 //
 
-#ifndef model_hpp
-#define model_hpp
+#ifndef render_component_hpp
+#define render_component_hpp
 
 #include "mesh.hpp"
 
@@ -20,18 +20,18 @@
 
 using namespace std;
 
-class Model {
+class RenderComponent {
 public:
     /*  Functions   */
-    Model(const GLchar* path) {
+    RenderComponent(const GLchar* path) {
         this->loadModel(path);
         this->model = glm::mat4();
     }
-    void draw(Shader shader);
+    void render(Shader shader);
 
     glm::mat4 model;
 private:
-    /*  Model Data  */
+    /*  RenderComponent Data  */
     vector<Mesh> meshes;
     vector<Texture> allModelTextures;
     string directory;
@@ -43,4 +43,4 @@ private:
     vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
 };
 
-#endif /* model_hpp */
+#endif /* render_component_hpp */

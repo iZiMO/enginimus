@@ -6,18 +6,18 @@
 //  Copyright © 2016 Joel Schmidt. All rights reserved.
 //
 
-#include <enginimus/model.hpp>
+#include <enginimus/render_component.hpp>
 #include <enginimus/util.hpp>
 
 using namespace std;
 
-void Model::draw(Shader shader) {
+void RenderComponent::render(Shader shader) {
     for(GLuint i = 0; i < this->meshes.size(); i++) {
-        this->meshes[i].draw(shader, this->model);
+        this->meshes[i].render(shader, this->model);
     }
 }
 
-void Model::loadModel(string path) {
+void RenderComponent::loadModel(string path) {
     // TODO process model to remove duplicate vertices
     Assimp::Importer import;
     const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
@@ -31,7 +31,7 @@ void Model::loadModel(string path) {
     this->processNode(scene->mRootNode, scene);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene) {
+void RenderComponent::processNode(aiNode* node, const aiScene* scene) {
     // Process all the node's meshes (if any)
     for(GLuint i = 0; i < node->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
@@ -44,7 +44,7 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
     }
 }
 
-Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
+Mesh RenderComponent::processMesh(aiMesh *mesh, const aiScene *scene) {
     cout << "Processing mesh " << mesh->mName.C_Str() << endl;
     vector<Vertex> vertices;
     vector<GLuint> indices;
@@ -81,25 +81,23 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     }
     
     // Process material
-    //if(mesh->mMaterialIndex >= 0) {
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
     cout << "  loading material " << mesh->mMaterialIndex << endl;
     vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, TEXTURE_TYPE_DIFFUSE);
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
     vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, TEXTURE_TYPE_SPECULAR);
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-    //}
     
     return Mesh(vertices, indices, textures);
 }
 
-vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName) {
+vector<Texture> RenderComponent::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName) {
     vector<Texture> materialTextures;
     for(GLuint i = 0; i < mat->GetTextureCount(type); i++) {
         aiString str;
         mat->GetTexture(type, i, &str);
         cout << "    " << typeName << " - " << str.C_Str() << endl;
-        GLboolean textureLoaded = false;
+        bool textureLoaded = false;
         
         // see if we've already loaded this texture
         for(GLuint j = 0; j < allModelTextures.size(); j++) {
