@@ -6,8 +6,8 @@
 //  Copyright © 2016 Joel Schmidt. All rights reserved.
 //
 
-#ifndef structures_h
-#define structures_h
+#ifndef ENGINIMUS_RENDER_STRUCTURES_HPP
+#define ENGINIMUS_RENDER_STRUCTURES_HPP
 
 #include <glm/glm.hpp>
 #include <string>
@@ -26,9 +26,9 @@ struct Vertex {
 };
 
 struct Texture {
-    GLint id;
+    GLuint id;
     string type; // diffuse / specular?
     aiString path;
 };
 
-#endif /* structures_h */
+#endif /* ENGINIMUS_RENDER_STRUCTURES_HPP */

@@ -41,7 +41,7 @@ int main() {
 
     // TODO move to either render system or "component manager"
     RenderComponent box ("assets/Crate/Crate1.obj");
-    box.model = glm::translate(box.model, glm::vec3(-5.0f, 0.0f, 0.0f));
+    box.setModelMatrix(glm::translate(box.getModelMatrix(), glm::vec3(-5.0f, 0.0f, 0.0f)));
     RenderComponent dude ("assets/nanosuit.obj");
 
     renderSystem.registerComponent(box);

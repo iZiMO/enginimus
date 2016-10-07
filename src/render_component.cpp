@@ -11,12 +11,6 @@
 
 using namespace std;
 
-void RenderComponent::render(Shader shader) {
-    for(GLuint i = 0; i < this->meshes.size(); i++) {
-        this->meshes[i].render(shader, this->model);
-    }
-}
-
 void RenderComponent::loadModel(string path) {
     // TODO process model to remove duplicate vertices
     Assimp::Importer import;

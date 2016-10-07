@@ -1,12 +1,11 @@
 //
-//  .hpp
 //
 //  Created by Joel Schmidt on 21/09/2016.
 //  Copyright © 2016 Joel Schmidt. All rights reserved.
 //
 
-#ifndef camera_hpp
-#define camera_hpp
+#ifndef ENGINIMUS_FREE_LOOK_CAMERA_HPP
+#define ENGINIMUS_FREE_LOOK_CAMERA_HPP
 
 #include <stdio.h>
 #include <glm/glm.hpp>
@@ -33,7 +32,7 @@ class FreeLookCamera : public Camera {
 public:
     
     void onMouseMoved(int xpos, int ypos) {
-        if(first) // this bool variable is initially set to true
+        if(first)
         {
             lastX = xpos;
             lastY = ypos;
@@ -92,4 +91,4 @@ public:
     }
 };
 
-#endif /* camera_hpp */
+#endif /* ENGINIMUS_FREE_LOOK_CAMERA_HPP */

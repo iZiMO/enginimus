@@ -33,7 +33,9 @@ private:
     vector<RenderComponent> components;
 
     void prepareFrame(const Camera& camera);
-    void renderComponents();
+    void renderComponents() const;
+    void renderComponent(const Shader&, const RenderComponent&) const;
+    void renderMesh(const Shader&, const Mesh&, const glm::mat4&) const;
 };
 
 #endif //ENGINIMUS_RENDER_SYSTEM_H

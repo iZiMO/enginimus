@@ -6,8 +6,8 @@
 //  Copyright © 2016 Joel Schmidt. All rights reserved.
 //
 
-#ifndef mesh_hpp
-#define mesh_hpp
+#ifndef ENGINIMUS_MESH_HPP
+#define ENGINIMUS_MESH_HPP
 
 #include <stdio.h>
 #include <vector>
@@ -18,18 +18,20 @@ using namespace std;
 
 class Mesh {
 public:
+    Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures);
+
+    inline GLuint getVAO() const { return VAO; }
+    inline const vector<Texture>& getTextures() const { return textures; }
+    inline const int getNumIndices() const { return (int)indices.size(); }
+private:
+    /*  Render data  */
+    GLuint VAO, VBO, EBO;
     /*  Mesh Data  */
     vector<Vertex> vertices;
     vector<GLuint> indices;
     vector<Texture> textures;
-    /*  Functions  */
-    Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures);
-    void render(Shader shader, glm::mat4 model) const;
-private:
-    /*  Render data  */
-    GLuint VAO, VBO, EBO;
-    /*  Functions    */
+
     void setupMesh();
 };
 
-#endif /* mesh_hpp */
+#endif /* ENGINIMUS_MESH_HPP */

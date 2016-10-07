@@ -6,6 +6,7 @@
 
 // GLEW
 #define GLEW_STATIC
+
 #include <GL/glew.h>
 
 // GLFW
@@ -54,7 +55,9 @@ int RenderSystem::init(const int windowWidth, const int windowHeight, const char
 
     // create shaders
     shader = new Shader("shaders/default.vert",
-            "shaders/default.frag");
+                        "shaders/default.frag");
+
+    return 0;
 }
 
 void RenderSystem::inspect() {
@@ -71,7 +74,7 @@ void RenderSystem::render(const Camera &camera) {
     glfwSwapBuffers(window);
 }
 
-void RenderSystem::prepareFrame(const Camera& camera) {
+void RenderSystem::prepareFrame(const Camera &camera) {
     glClearColor(0.1f, 0.3f, 0.3f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glm::mat4 view = camera.getView();
@@ -83,9 +86,37 @@ void RenderSystem::prepareFrame(const Camera& camera) {
     glUniformMatrix4fv(glGetUniformLocation(shader->program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 }
 
-void RenderSystem::renderComponents() {
+void RenderSystem::renderComponents() const {
     Shader s = *shader;
-    for(vector<RenderComponent>::iterator it = components.begin(); it != components.end(); ++it) {
-        it->render(s);
+    for (vector<RenderComponent>::const_iterator it = components.begin(); it != components.end(); ++it) {
+        renderComponent(s, *it);
     }
+}
+
+void RenderSystem::renderComponent(const Shader& s, const RenderComponent& component) const {
+    for (GLuint i = 0; i < component.getMeshes().size(); i++) {
+        renderMesh(s, component.getMeshes()[i], component.getModelMatrix());
+    }
+}
+
+void RenderSystem::renderMesh(const Shader& s, const Mesh& mesh, const glm::mat4& model) const {
+    GLuint diffuseNr = 1;
+    GLuint specularNr = 1;
+
+    for (GLuint i = 0; i < mesh.getTextures().size(); i++) {
+        glActiveTexture(GL_TEXTURE0 + i);
+
+        std::string name = mesh.getTextures()[i].type;
+        std::string number = (name == TEXTURE_TYPE_DIFFUSE) ? std::to_string(diffuseNr++) : std::to_string(specularNr++);
+
+        glUniform1i(glGetUniformLocation(s.program, ("material." + name + number).c_str()), i);
+        glBindTexture(GL_TEXTURE_2D, mesh.getTextures()[i].id);
+    }
+    glActiveTexture(GL_TEXTURE0);
+
+    // Draw mesh
+    glUniformMatrix4fv(glGetUniformLocation(s.program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+    glBindVertexArray(mesh.getVAO());
+    glDrawElements(GL_TRIANGLES, mesh.getNumIndices(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }

@@ -6,8 +6,8 @@
 //  Copyright © 2016 Joel Schmidt. All rights reserved.
 //
 
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef ENGINIMUS_SHADER_H
+#define ENGINIMUS_SHADER_H
 
 #include <string>
 #include <fstream>
@@ -105,4 +105,4 @@ public:
     }
 };
 
-#endif /* shader_h */
+#endif /* ENGINIMUS_SHADER_H */

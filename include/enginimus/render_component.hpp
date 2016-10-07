@@ -5,8 +5,8 @@
 //  Copyright © 2016 Joel Schmidt. All rights reserved.
 //
 
-#ifndef render_component_hpp
-#define render_component_hpp
+#ifndef ENGINIMUS_RENDER_COMPONENT_HPP
+#define ENGINIMUS_RENDER_COMPONENT_HPP
 
 #include "mesh.hpp"
 
@@ -27,11 +27,13 @@ public:
         this->loadModel(path);
         this->model = glm::mat4();
     }
-    void render(Shader shader);
 
-    glm::mat4 model;
+    void setModelMatrix(const glm::mat4 model) { this->model = model; }
+    inline const glm::mat4& getModelMatrix() const { return model; }
+    inline const vector<Mesh>& getMeshes() const { return meshes; }
 private:
     /*  RenderComponent Data  */
+    glm::mat4 model;
     vector<Mesh> meshes;
     vector<Texture> allModelTextures;
     string directory;
@@ -43,4 +45,4 @@ private:
     vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
 };
 
-#endif /* render_component_hpp */
+#endif /* ENGINIMUS_RENDER_COMPONENT_HPP */

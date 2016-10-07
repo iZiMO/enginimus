@@ -47,25 +47,3 @@ void Mesh::setupMesh() {
     
     glBindVertexArray(0);
 }
-
-void Mesh::render(Shader shader, glm::mat4 model) const {
-    GLuint diffuseNr = 1;
-    GLuint specularNr = 1;
-    
-    for (GLuint i = 0; i < this->textures.size(); i++) {
-        glActiveTexture(GL_TEXTURE0 + i);
-        
-        std::string name = this->textures[i].type;
-        std::string number = (name == TEXTURE_TYPE_DIFFUSE) ? std::to_string(diffuseNr++) : std::to_string(specularNr++);
-        
-        glUniform1i(glGetUniformLocation(shader.program, ("material." + name + number).c_str()), i);
-        glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
-    }
-    glActiveTexture(GL_TEXTURE0);
-    
-    // Draw mesh
-    glUniformMatrix4fv(glGetUniformLocation(shader.program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-    glBindVertexArray(this->VAO);
-    glDrawElements(GL_TRIANGLES, (uint)this->indices.size(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-}
