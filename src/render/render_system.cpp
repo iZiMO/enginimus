@@ -2,7 +2,7 @@
 // Created by Joel Schmidt on 6/10/2016.
 //
 
-#include <enginimus/render_system.h>
+#include <enginimus/render/render_system.h>
 
 // GLEW
 #define GLEW_STATIC
@@ -18,7 +18,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
-#include <enginimus/render_component.hpp>
+#include <enginimus/render/render_component.hpp>
 
 using namespace std;
 

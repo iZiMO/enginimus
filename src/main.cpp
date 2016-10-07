@@ -23,8 +23,8 @@
 #include <iostream>
 
 #include <enginimus/free_look_camera.hpp>
-#include <enginimus/render_component.hpp>
-#include <enginimus/render_system.h>
+#include <enginimus/render/render_component.hpp>
+#include <enginimus/render/render_system.h>
 #include <enginimus/input_system.hpp>
 
 

@@ -6,7 +6,7 @@
 //  Copyright © 2016 Joel Schmidt. All rights reserved.
 //
 
-#include <enginimus/render_component.hpp>
+#include <enginimus/render/render_component.hpp>
 #include <enginimus/util.hpp>
 
 using namespace std;

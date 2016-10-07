@@ -4,7 +4,7 @@ project(enginimus)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 include_directories(include)
-file(GLOB SOURCE_FILES "src/*.cpp")
+file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
 
 add_executable(enginimus ${SOURCE_FILES})
 

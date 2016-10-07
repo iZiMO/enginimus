@@ -6,7 +6,7 @@
 //  Copyright © 2016 Joel Schmidt. All rights reserved.
 //
 
-#include <enginimus/mesh.hpp>
+#include <enginimus/render/mesh.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures) {

@@ -7,9 +7,9 @@
 
 #include <vector>
 
-#include <enginimus/shader.h>
+#include <enginimus/render/shader.h>
 #include <enginimus/camera.hpp>
-#include <enginimus/render_component.hpp>
+#include <enginimus/render/render_component.hpp>
 
 
 class GLFWwindow;
