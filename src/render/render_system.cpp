@@ -54,13 +54,13 @@ int RenderSystem::init(const int windowWidth, const int windowHeight, const char
     glEnable(GL_DEPTH_TEST);
 
     // create shaders
-    shader = new Shader("shaders/default.vert",
-                        "shaders/default.frag");
+    shader = std::unique_ptr<Shader>(new Shader("shaders/default.vert",
+                    "shaders/default.frag"));
 
     return 0;
 }
 
-void RenderSystem::inspect() {
+void RenderSystem::inspect() const {
     GLint nrAttributes;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
     cout << "Maximum nr of vertex attributes supported: " << nrAttributes << endl;
@@ -68,17 +68,17 @@ void RenderSystem::inspect() {
     // etc..
 }
 
-void RenderSystem::render(const Camera &camera) {
-    prepareFrame(camera);
+void RenderSystem::render() const {
+    prepareFrame();
     renderComponents();
     glfwSwapBuffers(window);
 }
 
-void RenderSystem::prepareFrame(const Camera &camera) {
+void RenderSystem::prepareFrame() const {
     glClearColor(0.1f, 0.3f, 0.3f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glm::mat4 view = camera.getView();
-    glm::mat4 projection = camera.getProjection(width, height);
+    glm::mat4 view = camera->getView();
+    glm::mat4 projection = camera->getProjection(width, height);
 
     shader->use();
     //glUniform1i(glGetUniformLocation(shader->program, "toggle"), toggle);

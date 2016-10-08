@@ -11,28 +11,27 @@
 #include <enginimus/camera.hpp>
 #include <enginimus/render/render_component.hpp>
 
-
 class GLFWwindow;
 
 class RenderSystem {
 public:
     int init(const int windowWidth, const int windowHeight, const char* title);
-    GLFWwindow* getWindow() { return window; }
-    void inspect();
-
-    void render(const Camera &camera);
-
+    void setCamera(std::unique_ptr<Camera> camera) { this->camera = std::move(camera); }
     void registerComponent(RenderComponent component) { components.push_back(component); }
+    GLFWwindow* getWindow() { return window; }
+    void inspect() const;
+    void render() const;
 
 private:
     GLFWwindow *window;
-    Shader* shader;
+    std::unique_ptr<Shader> shader;
+    std::unique_ptr<Camera> camera;
     int width;
     int height;
 
     vector<RenderComponent> components;
 
-    void prepareFrame(const Camera& camera);
+    void prepareFrame() const;
     void renderComponents() const;
     void renderComponent(const Shader&, const RenderComponent&) const;
     void renderMesh(const Shader&, const Mesh&, const glm::mat4&) const;

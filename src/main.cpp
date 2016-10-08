@@ -17,9 +17,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// Image loader
-#include <SOIL.h>
-
 #include <iostream>
 
 #include <enginimus/free_look_camera.hpp>
@@ -36,6 +33,7 @@ int main() {
 
     RenderSystem renderSystem;
     renderSystem.init(800, 600, "test");
+    renderSystem.setCamera(std::unique_ptr<Camera>(new FreeLookCamera()));
 
     InputSystem inputSystem(renderSystem.getWindow());
 
@@ -46,8 +44,6 @@ int main() {
 
     renderSystem.registerComponent(box);
     renderSystem.registerComponent(dude);
-
-    FreeLookCamera camera;
     
     // Game loop
     while(!glfwWindowShouldClose(renderSystem.getWindow()))
@@ -57,7 +53,7 @@ int main() {
 //        lastFrame = currentFrame;
 
         inputSystem.processInput();
-        renderSystem.render(camera);
+        renderSystem.render();
     }
 
     glfwTerminate();
