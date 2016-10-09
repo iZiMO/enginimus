@@ -8,7 +8,7 @@
 #include <vector>
 
 #include <enginimus/render/shader.h>
-#include <enginimus/camera.hpp>
+#include <enginimus/render/camera.hpp>
 #include <enginimus/render/render_component.hpp>
 
 class GLFWwindow;
@@ -17,7 +17,6 @@ class RenderSystem {
 public:
     int init(const int windowWidth, const int windowHeight, const char* title);
     void setCamera(std::unique_ptr<Camera> camera) { this->camera = std::move(camera); }
-    void registerComponent(RenderComponent component) { components.push_back(component); }
     GLFWwindow* getWindow() { return window; }
     void inspect() const;
     void render() const;

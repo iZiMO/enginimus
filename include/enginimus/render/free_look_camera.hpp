@@ -14,7 +14,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include <enginimus/camera.hpp>
+#include <enginimus/render/camera.hpp>
 
 class FreeLookCamera : public Camera {
     

@@ -17,10 +17,11 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <enginimus/component/component.hpp>
 
 using namespace std;
 
-class RenderComponent {
+class RenderComponent : Component<RenderComponent> {
 public:
     /*  Functions   */
     RenderComponent(const GLchar* path) {

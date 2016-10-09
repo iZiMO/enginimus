@@ -5,8 +5,12 @@
 #ifndef ENGINIMUS_ENGINIMUS_H
 #define ENGINIMUS_ENGINIMUS_H
 
-using EntityId = int;
+#include <cstddef>
 
-using PayloadSize =
+using ComponentId = size_t;
+
+using EntityId = size_t;
+
+const size_t MAX_ENTITIES = 1000l;
 
 #endif //ENGINIMUS_ENGINIMUS_H

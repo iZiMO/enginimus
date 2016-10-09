@@ -8,6 +8,7 @@
 
 // GLEW
 #define GLEW_STATIC
+
 #include <GL/glew.h>
 // GLFW
 #include <GLFW/glfw3.h>
@@ -19,43 +20,65 @@
 
 #include <iostream>
 
-#include <enginimus/free_look_camera.hpp>
+#include <enginimus/render/free_look_camera.hpp>
 #include <enginimus/render/render_component.hpp>
 #include <enginimus/render/render_system.h>
 #include <enginimus/input_system.hpp>
+
+#include <enginimus/component/component_manager.hpp>
 
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 
+struct PositionComponent {
+    std::string val;
+};
+
+struct BehaviourComponent {
+};
+
+using Manager = ComponentManager
+        <
+        PositionComponent,
+        BehaviourComponent
+        >;
+
 
 int main() {
 
-    RenderSystem renderSystem;
-    renderSystem.init(800, 600, "test");
-    renderSystem.setCamera(std::unique_ptr<Camera>(new FreeLookCamera()));
+    Manager manager;
 
-    InputSystem inputSystem(renderSystem.getWindow());
+    PositionComponent pos;
+    pos.val = "hello";
+    manager.set(0, pos);
+    cout << manager.get<PositionComponent>(0).val << endl;
 
-    // TODO move to either render system or "component manager"
-    RenderComponent box ("assets/Crate/Crate1.obj");
-    box.setModelMatrix(glm::translate(box.getModelMatrix(), glm::vec3(-5.0f, 0.0f, 0.0f)));
-    RenderComponent dude ("assets/nanosuit.obj");
-
-    renderSystem.registerComponent(box);
-    renderSystem.registerComponent(dude);
-    
-    // Game loop
-    while(!glfwWindowShouldClose(renderSystem.getWindow()))
-    {
-//        GLfloat currentFrame = (GLfloat)glfwGetTime();
-//        deltaTime = currentFrame - lastFrame;
-//        lastFrame = currentFrame;
-
-        inputSystem.processInput();
-        renderSystem.render();
-    }
-
-    glfwTerminate();
-    return 0;
+//    RenderSystem renderSystem;
+//    renderSystem.init(800, 600, "test");
+//    renderSystem.setCamera(std::unique_ptr<Camera>(new FreeLookCamera()));
+//
+//    InputSystem inputSystem(renderSystem.getWindow());
+//
+//    // TODO move to either render system or "component manager"
+//    RenderComponent box ("assets/Crate/Crate1.obj");
+//    box.setModelMatrix(glm::translate(box.getModelMatrix(), glm::vec3(-5.0f, 0.0f, 0.0f)));
+//    RenderComponent dude ("assets/nanosuit.obj");
+//
+//    renderSystem.registerComponent(box);
+//    renderSystem.registerComponent(dude);
+//
+//    // Game loop
+//    while(!glfwWindowShouldClose(renderSystem.getWindow()))
+//    {
+////        GLfloat currentFrame = (GLfloat)glfwGetTime();
+////        deltaTime = currentFrame - lastFrame;
+////        lastFrame = currentFrame;
+//
+//        inputSystem.processInput();
+//        renderSystem.render();
+//    }
+//
+//    glfwTerminate();
+//    return 0;
 }

@@ -7,13 +7,7 @@
 
 #include <vector>
 #include <type_traits>
-
-// Event
-class BaseEvent {
-protected:
-    static size_t nextId;
-};
-size_t BaseEvent::nextId = 0;
+#include "base_event.hpp"
 
 template<typename T>
 class Event : BaseEvent {
