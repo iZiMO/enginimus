@@ -8,6 +8,8 @@
 #include <cstddef>
 
 class BaseComponent {
+public:
+    static constexpr size_t numComponentTypes();
 protected:
     static size_t nextId;
 };

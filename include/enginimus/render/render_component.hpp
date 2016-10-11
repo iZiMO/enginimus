@@ -21,7 +21,7 @@
 
 using namespace std;
 
-class RenderComponent : Component<RenderComponent> {
+class RenderComponent : public Component<RenderComponent> {
 public:
     /*  Functions   */
     RenderComponent(const GLchar* path) {

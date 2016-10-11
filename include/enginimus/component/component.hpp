@@ -13,14 +13,11 @@ template<typename T>
 class Component : BaseComponent {
 public:
     size_t getId() { return id; }
-    static size_t numComponentTypes();
 private:
     static size_t id;
 };
 template<typename T>
 size_t Component<T>::id = BaseComponent::nextId++;
-template<typename T>
-size_t Component<T>::numComponentTypes() { return BaseComponent::nextId; }
 
 
 #endif //ENGINIMUS_COMPONENT_HPP

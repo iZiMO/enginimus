@@ -26,16 +26,20 @@
 #include <enginimus/input_system.hpp>
 
 #include <enginimus/component/component_manager.hpp>
+#include <enginimus/component/component.hpp>
+#include <enginimus/entity_manager.hpp>
 
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 
-struct PositionComponent {
+class PositionComponent : public Component<PositionComponent> {
+public:
     std::string val;
 };
 
-struct BehaviourComponent {
+class BehaviourComponent : public  Component<BehaviourComponent> {
+
 };
 
 using Manager = ComponentManager
@@ -53,6 +57,12 @@ int main() {
     pos.val = "hello";
     manager.set(0, pos);
     cout << manager.get<PositionComponent>(0).val << endl;
+
+    EntityManager entityManager;
+    entityManager.entities[0].enableComponent(RenderComponent::getId());
+    entityManager.entities[0].enableComponent(PositionComponent::getId());
+
+    entityManager.processEntities<RenderComponent, PositionComponent>();
 
 //    RenderSystem renderSystem;
 //    renderSystem.init(800, 600, "test");
