@@ -7,7 +7,6 @@
 //
 
 #include <enginimus/render/mesh.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures) {
     this->vertices = vertices;

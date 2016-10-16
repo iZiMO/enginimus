@@ -7,8 +7,6 @@
 
 #include <cstddef>
 
-using ComponentId = size_t;
-
 using EntityId = size_t;
 
 const size_t MAX_ENTITIES = 1000l;

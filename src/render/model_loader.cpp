@@ -1,44 +1,44 @@
 //
-//  model.cpp
-//  gol
-//
-//  Created by Joel Schmidt on 2/10/2016.
-//  Copyright © 2016 Joel Schmidt. All rights reserved.
+// Created by Joel Schmidt on 16/10/2016.
 //
 
-#include <enginimus/render/render_component.hpp>
+#include <enginimus/render/model_loader.hpp>
 #include <enginimus/util.hpp>
+
+#include <iostream>
 
 using namespace std;
 
-void RenderComponent::loadModel(string path) {
+void ModelLoader::loadModel(const string path, RenderComponent& renderComponent) {
     // TODO process model to remove duplicate vertices
     Assimp::Importer import;
     const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
-    
+
     if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         cout << "ERROR::ASSIMP::" << import.GetErrorString() << endl;
         return;
     }
-    this->directory = path.substr(0, path.find_last_of('/'));
-    
-    this->processNode(scene->mRootNode, scene);
+
+    renderComponent.directory = path.substr(0, path.find_last_of('/'));
+
+    vector<Texture> textureCache;
+    processNode(scene->mRootNode, scene, textureCache, renderComponent);
 }
 
-void RenderComponent::processNode(aiNode* node, const aiScene* scene) {
+void ModelLoader::processNode(aiNode* node, const aiScene* scene, vector<Texture> &textureCache, RenderComponent& renderComponent) {
     // Process all the node's meshes (if any)
     for(GLuint i = 0; i < node->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        this->meshes.push_back(this->processMesh(mesh, scene));
+        renderComponent.meshes.push_back(this->processMesh(mesh, scene, renderComponent.directory, textureCache));
     }
-    
+
     // Then do the same for each of its children
     for(GLuint i = 0; i < node->mNumChildren; i++) {
-        this->processNode(node->mChildren[i], scene);
+        this->processNode(node->mChildren[i], scene, textureCache, renderComponent);
     }
 }
 
-Mesh RenderComponent::processMesh(aiMesh *mesh, const aiScene *scene) {
+Mesh ModelLoader::processMesh(aiMesh *mesh, const aiScene *scene, const string directory, vector<Texture> &textureCache) {
     cout << "Processing mesh " << mesh->mName.C_Str() << endl;
     vector<Vertex> vertices;
     vector<GLuint> indices;
@@ -51,7 +51,7 @@ Mesh RenderComponent::processMesh(aiMesh *mesh, const aiScene *scene) {
         vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
 
         vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-        
+
         glm::vec2 vec;
         if(mesh->mTextureCoords[0]) {
             vec.x = mesh->mTextureCoords[0][i].x;
@@ -61,7 +61,7 @@ Mesh RenderComponent::processMesh(aiMesh *mesh, const aiScene *scene) {
             vec.y = 0.f;
         }
         vertex.texCoords = vec;
-        
+
         vertices.push_back(vertex);
     }
 
@@ -73,46 +73,44 @@ Mesh RenderComponent::processMesh(aiMesh *mesh, const aiScene *scene) {
             indices.push_back(face.mIndices[j]);
         }
     }
-    
+
     // Process material
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
     cout << "  loading material " << mesh->mMaterialIndex << endl;
-    vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, TEXTURE_TYPE_DIFFUSE);
+    vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, TEXTURE_TYPE_DIFFUSE, directory, textureCache);
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-    vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, TEXTURE_TYPE_SPECULAR);
+    vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, TEXTURE_TYPE_SPECULAR, directory, textureCache);
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-    
+
     return Mesh(vertices, indices, textures);
 }
 
-vector<Texture> RenderComponent::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName) {
+vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const string typeName, const string directory, vector<Texture> &textureCache) {
     vector<Texture> materialTextures;
     for(GLuint i = 0; i < mat->GetTextureCount(type); i++) {
         aiString str;
         mat->GetTexture(type, i, &str);
         cout << "    " << typeName << " - " << str.C_Str() << endl;
         bool textureLoaded = false;
-        
+
         // see if we've already loaded this texture
-        for(GLuint j = 0; j < allModelTextures.size(); j++) {
-            if(allModelTextures[j].path == str) {
-                materialTextures.push_back(allModelTextures[j]);
+        for(GLuint j = 0; j < textureCache.size(); j++) {
+            if(textureCache[j].path == str) {
+                materialTextures.push_back(textureCache[j]);
                 textureLoaded = true;
                 break;
             }
         }
-        
+
         if(!textureLoaded) {
             // If texture hasn't been loaded already, load it
             Texture texture;
-            texture.id = util::TextureFromFile(str.C_Str(), this->directory);
+            texture.id = util::TextureFromFile(str.C_Str(), directory);
             texture.type = typeName;
             texture.path = str;
             materialTextures.push_back(texture);
-            this->allModelTextures.push_back(texture);  // Add to loaded textures
+            textureCache.push_back(texture);  // Add to cached textures
         }
     }
     return materialTextures;
 }
-
-

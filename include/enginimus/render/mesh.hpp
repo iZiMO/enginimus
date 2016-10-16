@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <vector>
 #include "structures.hpp"
-#include "shader.h"
 
 using namespace std;
 
@@ -20,10 +19,8 @@ class Mesh {
 public:
     Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures);
 
-    inline GLuint getVAO() const { return VAO; }
-    inline const vector<Texture>& getTextures() const { return textures; }
     inline const int getNumIndices() const { return (int)indices.size(); }
-private:
+
     /*  Render data  */
     GLuint VAO, VBO, EBO;
     /*  Mesh Data  */
@@ -31,6 +28,7 @@ private:
     vector<GLuint> indices;
     vector<Texture> textures;
 
+private:
     void setupMesh();
 };
 

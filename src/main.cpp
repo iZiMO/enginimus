@@ -20,75 +20,68 @@
 
 #include <iostream>
 
-#include <enginimus/render/free_look_camera.hpp>
-#include <enginimus/render/render_component.hpp>
-#include <enginimus/render/render_system.h>
-#include <enginimus/input_system.hpp>
-
 #include <enginimus/component/component_manager.hpp>
-#include <enginimus/component/component.hpp>
-#include <enginimus/entity_manager.hpp>
+#include <enginimus/component/render_component.hpp>
 
+#include <enginimus/render/render_system.h>
+#include <enginimus/render/free_look_camera.hpp>
+
+#include <enginimus/input_system.hpp>
+#include <enginimus/entity/entity_manager.hpp>
+#include <enginimus/render/model_loader.hpp>
+
+using namespace std;
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 
-class PositionComponent : public Component<PositionComponent> {
-public:
-    std::string val;
-};
+EntityId numEntities = 0;
 
-class BehaviourComponent : public  Component<BehaviourComponent> {
+EntityId createEntity(EntityManager& entityManager, shared_ptr<ComponentManager> componentManager,
+                  ModelLoader& modelLoader, string modelPath) {
 
-};
+    RenderComponent render;
+    modelLoader.loadModel(modelPath, render);
+    componentManager->set(numEntities, render);
+    entityManager.entities[numEntities].enableComponent(RenderComponent::getType());
 
-using Manager = ComponentManager
-        <
-        PositionComponent,
-        BehaviourComponent
-        >;
+    TransformComponent transform;
+    componentManager->set(numEntities, transform);
+    entityManager.entities[numEntities].enableComponent(TransformComponent::getType());
 
+    return ++numEntities;
+}
 
 int main() {
+    shared_ptr<ComponentManager> componentManager = make_shared<ComponentManager>();
+    EntityManager entityManager (componentManager);
 
-    Manager manager;
+    RenderSystem renderSystem;
+    renderSystem.init(800, 600, "test");
+    renderSystem.setCamera(unique_ptr<Camera>(new FreeLookCamera()));
 
-    PositionComponent pos;
-    pos.val = "hello";
-    manager.set(0, pos);
-    cout << manager.get<PositionComponent>(0).val << endl;
+    InputSystem inputSystem(renderSystem.getWindow());
 
-    EntityManager entityManager;
-    entityManager.entities[0].enableComponent(RenderComponent::getId());
-    entityManager.entities[0].enableComponent(PositionComponent::getId());
 
-    entityManager.processEntities<RenderComponent, PositionComponent>();
+    ModelLoader modelLoader;
 
-//    RenderSystem renderSystem;
-//    renderSystem.init(800, 600, "test");
-//    renderSystem.setCamera(std::unique_ptr<Camera>(new FreeLookCamera()));
-//
-//    InputSystem inputSystem(renderSystem.getWindow());
-//
-//    // TODO move to either render system or "component manager"
-//    RenderComponent box ("assets/Crate/Crate1.obj");
-//    box.setModelMatrix(glm::translate(box.getModelMatrix(), glm::vec3(-5.0f, 0.0f, 0.0f)));
-//    RenderComponent dude ("assets/nanosuit.obj");
-//
-//    renderSystem.registerComponent(box);
-//    renderSystem.registerComponent(dude);
-//
-//    // Game loop
-//    while(!glfwWindowShouldClose(renderSystem.getWindow()))
-//    {
-////        GLfloat currentFrame = (GLfloat)glfwGetTime();
-////        deltaTime = currentFrame - lastFrame;
-////        lastFrame = currentFrame;
-//
-//        inputSystem.processInput();
-//        renderSystem.render();
-//    }
-//
-//    glfwTerminate();
-//    return 0;
+    EntityId box = createEntity(entityManager, componentManager, modelLoader, "assets/Crate/Crate1.obj");
+    TransformComponent transform = componentManager->get<TransformComponent>(box);
+    transform.transform = glm::translate(transform.transform, glm::vec3(0, 0, -5));
+
+    EntityId dude = createEntity(entityManager, componentManager, modelLoader, "assets/nanosuit.obj");
+
+    // Game loop
+    while(!glfwWindowShouldClose(renderSystem.getWindow()))
+    {
+//        GLfloat currentFrame = (GLfloat)glfwGetTime();
+//        deltaTime = currentFrame - lastFrame;
+//        lastFrame = currentFrame;
+
+        inputSystem.processInput();
+        renderSystem.render(entityManager);
+    }
+
+    glfwTerminate();
+    return 0;
 }

@@ -18,7 +18,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
-#include <enginimus/render/render_component.hpp>
+#include <functional>
 
 using namespace std;
 
@@ -68,9 +68,14 @@ void RenderSystem::inspect() const {
     // etc..
 }
 
-void RenderSystem::render() const {
+void RenderSystem::render(EntityManager& entityManager) {
     prepareFrame();
-    renderComponents();
+
+    function<void(RenderComponent&, TransformComponent&)> renderFunc = [this](RenderComponent& render, TransformComponent& transform) {
+        this->renderComponent(render, transform);
+    };
+    entityManager.processEntities<RenderComponent, TransformComponent>(renderFunc);
+
     glfwSwapBuffers(window);
 }
 
@@ -86,16 +91,10 @@ void RenderSystem::prepareFrame() const {
     glUniformMatrix4fv(glGetUniformLocation(shader->program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 }
 
-void RenderSystem::renderComponents() const {
-    Shader s = *shader;
-    for (vector<RenderComponent>::const_iterator it = components.begin(); it != components.end(); ++it) {
-        renderComponent(s, *it);
-    }
-}
-
-void RenderSystem::renderComponent(const Shader& s, const RenderComponent& component) const {
-    for (GLuint i = 0; i < component.getMeshes().size(); i++) {
-        renderMesh(s, component.getMeshes()[i], component.getModelMatrix());
+void RenderSystem::renderComponent(RenderComponent& render, TransformComponent& transform) {
+    Shader s = *shader; // TODO use shader attached to render component
+    for (GLuint i = 0; i < render.meshes.size(); i++) {
+        renderMesh(s, render.meshes[i], transform.transform);
     }
 }
 
@@ -103,20 +102,20 @@ void RenderSystem::renderMesh(const Shader& s, const Mesh& mesh, const glm::mat4
     GLuint diffuseNr = 1;
     GLuint specularNr = 1;
 
-    for (GLuint i = 0; i < mesh.getTextures().size(); i++) {
+    for (GLuint i = 0; i < mesh.textures.size(); i++) {
         glActiveTexture(GL_TEXTURE0 + i);
 
-        std::string name = mesh.getTextures()[i].type;
+        std::string name = mesh.textures[i].type;
         std::string number = (name == TEXTURE_TYPE_DIFFUSE) ? std::to_string(diffuseNr++) : std::to_string(specularNr++);
 
         glUniform1i(glGetUniformLocation(s.program, ("material." + name + number).c_str()), i);
-        glBindTexture(GL_TEXTURE_2D, mesh.getTextures()[i].id);
+        glBindTexture(GL_TEXTURE_2D, mesh.textures[i].id);
     }
     glActiveTexture(GL_TEXTURE0);
 
     // Draw mesh
     glUniformMatrix4fv(glGetUniformLocation(s.program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-    glBindVertexArray(mesh.getVAO());
+    glBindVertexArray(mesh.VAO);
     glDrawElements(GL_TRIANGLES, mesh.getNumIndices(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
