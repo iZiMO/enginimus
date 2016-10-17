@@ -33,6 +33,13 @@ public:
         }
     }
 
+    template<typename ComponentT>
+    void setComponent(EntityId entityId, ComponentT component) {
+        componentManager->set(entityId, component);
+        entities[entityId].enableComponent(ComponentT::getType());
+    }
+
+private:
     template<typename ...ComponentT>
     void addComponentsToSignature(EntitySignature& signature) {
         addComponentTypesToSignature(signature, ComponentT::getType()...);

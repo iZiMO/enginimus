@@ -37,19 +37,15 @@ GLfloat lastFrame = 0.0f;
 
 EntityId numEntities = 0;
 
-EntityId createEntity(EntityManager& entityManager, shared_ptr<ComponentManager> componentManager,
-                  ModelLoader& modelLoader, string modelPath) {
+EntityId createEntity(EntityManager& entityManager, ModelLoader& modelLoader, string modelPath) {
 
     RenderComponent render;
     modelLoader.loadModel(modelPath, render);
-    componentManager->set(numEntities, render);
-    entityManager.entities[numEntities].enableComponent(RenderComponent::getType());
-
     TransformComponent transform;
-    componentManager->set(numEntities, transform);
-    entityManager.entities[numEntities].enableComponent(TransformComponent::getType());
+    entityManager.setComponent(numEntities, render);
+    entityManager.setComponent(numEntities, transform);
 
-    return ++numEntities;
+    return numEntities++;
 }
 
 int main() {
@@ -62,14 +58,13 @@ int main() {
 
     InputSystem inputSystem(renderSystem.getWindow());
 
-
     ModelLoader modelLoader;
 
-    EntityId box = createEntity(entityManager, componentManager, modelLoader, "assets/Crate/Crate1.obj");
+    EntityId box = createEntity(entityManager, modelLoader, "assets/Crate/Crate1.obj");
+    EntityId dude = createEntity(entityManager, modelLoader, "assets/nanosuit.obj");
+
     TransformComponent transform = componentManager->get<TransformComponent>(box);
     transform.transform = glm::translate(transform.transform, glm::vec3(0, 0, -5));
-
-    EntityId dude = createEntity(entityManager, componentManager, modelLoader, "assets/nanosuit.obj");
 
     // Game loop
     while(!glfwWindowShouldClose(renderSystem.getWindow()))
