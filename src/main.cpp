@@ -26,14 +26,11 @@
 #include <enginimus/render/render_system.h>
 #include <enginimus/render/free_look_camera.hpp>
 
-#include <enginimus/input_system.hpp>
+#include <enginimus/input/input_system.hpp>
 #include <enginimus/entity/entity_manager.hpp>
 #include <enginimus/render/model_loader.hpp>
 
 using namespace std;
-
-GLfloat deltaTime = 0.0f;
-GLfloat lastFrame = 0.0f;
 
 EntityId numEntities = 0;
 
@@ -46,6 +43,10 @@ EntityId createEntity(EntityManager& entityManager, ModelLoader& modelLoader, st
     entityManager.setComponent(numEntities, transform);
 
     return numEntities++;
+}
+
+void update() {
+    // update simulation
 }
 
 int main() {
@@ -66,14 +67,27 @@ int main() {
     TransformComponent transform = componentManager->get<TransformComponent>(box);
     transform.transform = glm::translate(transform.transform, glm::vec3(0, 0, -5));
 
-    // Game loop
-    while(!glfwWindowShouldClose(renderSystem.getWindow()))
+
+    const double MS_PER_UPDATE = 1000 / 60;
+
+    // Game loop base off http://gameprogrammingpatterns.com/game-loop.html
+    double previous = glfwGetTime();
+    double lag = 0.0;
+    while (!glfwWindowShouldClose(renderSystem.getWindow()))
     {
-//        GLfloat currentFrame = (GLfloat)glfwGetTime();
-//        deltaTime = currentFrame - lastFrame;
-//        lastFrame = currentFrame;
+        double current = glfwGetTime();
+        double elapsed = current - previous;
+        previous = current;
+        lag += elapsed;
 
         inputSystem.processInput();
+
+        while (lag >= MS_PER_UPDATE)
+        {
+            update();
+            lag -= MS_PER_UPDATE;
+        }
+
         renderSystem.render(entityManager);
     }
 
