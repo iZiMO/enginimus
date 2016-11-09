@@ -15,21 +15,41 @@
 #include <GLFW/glfw3.h>
 
 #include <enginimus/render/camera.hpp>
+#include <enginimus/event/event_dispatch.hpp>
+#include <enginimus/events/camera_events.hpp>
+
+class AttachCameraEventListener;
 
 class FreeLookCamera : public Camera {
     
     bool first = true;
-    
-    glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
-    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
-    
+
     int lastX = 0;
     int lastY = 0;
     GLfloat pitch = 0.f;
     GLfloat yaw = -90.f;
-    
+
+    glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
+    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
+
+    glm::vec3 cameraOffset = glm::vec3(0.0f, 0.0f,  3.0f);
+
+    EntityId target;
+    bool follow = true;
+    shared_ptr<ComponentManager> componentManager;
+    shared_ptr<AttachCameraEventListener> attachCameraToTargetListener;
+
 public:
+
+    FreeLookCamera(std::shared_ptr<ComponentManager> componentManager) {
+        this->componentManager = componentManager;
+        this->attachCameraToTargetListener = std::make_shared<AttachCameraEventListener>(this);
+        EventDispatch::getInstance()->registerListener<AttachCamera>(attachCameraToTargetListener.get());
+    }
+
+    inline void setTarget(EntityId target) { this->target = target; }
+    inline void followTarget(bool follow) { this->follow = follow; }
     
     void onMouseMoved(int xpos, int ypos) {
         if(first)
@@ -83,11 +103,28 @@ public:
     }
 
     glm::mat4 getView() const {
-        return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+//        auto targetTransform = componentManager->get<TransformComponent>(target);
+//        auto targetPosition = glm::vec3(targetTransform.transform[3]);
+//        auto cameraPosition = targetPosition + cameraOffset;
+//        return glm::lookAt(cameraPosition, cameraPosition + targetPosition, cameraUp);
+        return glm::mat4();
     }
 
     glm::mat4 getProjection(float windowWidth, float windowHeight) const {
         return glm::perspectiveFov(glm::radians(45.f), windowWidth, windowHeight, 0.1f, 100.f);
+    }
+};
+
+class AttachCameraEventListener: public EventListener<AttachCamera> {
+    FreeLookCamera* camera;
+public:
+    AttachCameraEventListener(FreeLookCamera* camera) {
+        this->camera = camera;
+    }
+
+    void handle(const AttachCamera& event) {
+        camera->setTarget(event.id);
+        camera->followTarget(true);
     }
 };
 

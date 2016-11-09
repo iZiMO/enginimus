@@ -10,5 +10,6 @@
 using EntityId = size_t;
 
 const size_t MAX_ENTITIES = 1000l;
+const size_t MAX_LISTENER_INSTANCES = 1000l;
 
 #endif //ENGINIMUS_ENGINIMUS_H

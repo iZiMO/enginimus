@@ -9,43 +9,80 @@
 #include <type_traits>
 #include <enginimus/event/event_listener.hpp>
 
+using namespace std;
+
+using ListenerInstances = vector<BaseEventListener*>;
+using ListenerTypesForEvent = vector<ListenerInstances>;
+using AllListeners = vector<ListenerTypesForEvent>;
+
 class EventDispatch {
 public:
-    EventDispatch() {
-        instance = this;
-    }
 
     static EventDispatch* getInstance();
 
     template<typename EventType, typename ListenerType>
     void registerListener(ListenerType* listener) {
         size_t eventId = EventType::getId();
-        size_t listenerId = ListenerType::getId();
+        size_t listenerTypeId = ListenerType::getId();
 
         if (allListeners.size() <= eventId) {
             allListeners.resize(eventId + 1);
         }
 
-        std::vector<BaseEventListener*>& listenersForEvent = allListeners[eventId];
-        if (listenersForEvent.size() <= listenerId) {
-            listenersForEvent.resize(listenerId + 1);
+        ListenerTypesForEvent& listenersForType = allListeners[eventId];
+        if (listenersForType.size() <= listenerTypeId) {
+            listenersForType.resize(listenerTypeId + 1);
+            numInstancesOfType.resize(listenerTypeId + 1);
         }
 
-        listenersForEvent[listenerId] = listener;
+        ListenerInstances& listenerInstances = listenersForType[listenerTypeId];
+        if (listenerInstances.size() <= MAX_LISTENER_INSTANCES) {
+            listenerInstances.resize(MAX_LISTENER_INSTANCES);
+        }
+
+        addInstance(listenerTypeId, listenerInstances, listener);
     }
 
     template<typename EventType, typename ListenerType>
     void deregisterListener(ListenerType* listener) {
-        allListeners[EventType::getId()][ListenerType::getId()] = NULL;
+        removeInstance(ListenerType::getId(), allListeners[EventType::getId()][ListenerType::getId()], listener);
     }
 private:
-    // eventId -> list of listeners
-    std::vector<std::vector<BaseEventListener*>> allListeners;
+    AllListeners allListeners;
+    vector<int> numInstancesOfType;
     static EventDispatch* instance;
+
+    EventDispatch() {
+        instance = this;
+    }
+
+    template<typename ListenerType>
+    void addInstance(size_t listenerTypeId, ListenerInstances &instances, ListenerType *listener) {
+        int numInstances = numInstancesOfType[listenerTypeId];
+        listener->slot = numInstances++;
+        instances[listener->slot] = listener;
+        numInstancesOfType[numInstances];
+    }
+
+    template<typename ListenerType>
+    void removeInstance(size_t listenerTypeId, ListenerInstances &instances, ListenerType *listener) {
+        assert(listener->slot >= 0);
+        int numInstances = numInstancesOfType[listenerTypeId];
+        int lastSlot = numInstances - 1;
+        auto lastListener = instances[lastSlot];
+        lastListener->slot = listener->slot;
+        listener->slot = -1;
+        instances[numInstances--] = NULL;
+        instances[lastListener->slot] = lastListener;
+        numInstancesOfType[listenerTypeId] = numInstances;
+    }
 };
 
 EventDispatch* EventDispatch::instance = NULL;
-static EventDispatch* EventDispatch::getInstance() {
+EventDispatch* EventDispatch::getInstance() {
+    if (!instance) {
+        instance = new EventDispatch();
+    }
     return instance;
 }
 

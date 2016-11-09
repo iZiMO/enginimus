@@ -10,13 +10,16 @@
 
 // Listener
 class BaseEventListener {
+public:
+    // Slot inside event dispatcher that this instance occupies
+    int slot = -1;
 protected:
     static size_t nextId;
 };
 size_t BaseEventListener::nextId = 0;
 
 template<class EventType>
-class EventListener : BaseEventListener {
+class EventListener : public BaseEventListener {
 public:
     virtual void handle(const EventType& event) = 0;
     static size_t getId() { return id; }

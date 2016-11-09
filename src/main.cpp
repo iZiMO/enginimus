@@ -55,9 +55,11 @@ int main() {
 
     RenderSystem renderSystem;
     renderSystem.init(800, 600, "test");
-    renderSystem.setCamera(unique_ptr<Camera>(new FreeLookCamera()));
+    renderSystem.setCamera(unique_ptr<Camera>(new FreeLookCamera(componentManager)));
 
     InputSystem inputSystem(renderSystem.getWindow());
+    shared_ptr<InputContext> inputContext = make_shared<InputContext>();
+    inputSystem.setContext(inputContext);
 
     ModelLoader modelLoader;
 
@@ -66,6 +68,7 @@ int main() {
 
     TransformComponent transform = componentManager->get<TransformComponent>(box);
     transform.transform = glm::translate(transform.transform, glm::vec3(0, 0, -5));
+
 
 
     const double MS_PER_UPDATE = 1000 / 60;

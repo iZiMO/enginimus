@@ -5,8 +5,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 include_directories(include)
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
-
-add_executable(enginimus ${SOURCE_FILES})
+file(GLOB MAIN_FILE "src/main.cpp")
+list(REMOVE_ITEM SOURCE_FILES "${MAIN_FILE}")
+file(GLOB_RECURSE TEST_FILES "test/*.cpp")
 
 #########################################################
 # FIND OPENGL
@@ -67,16 +68,28 @@ if(NOT assimp_FOUND)
     message(ERROR " assimp not found!")
 endif(NOT assimp_FOUND)
 
+find_package(GTest REQUIRED)
+if(NOT GTEST_FOUND)
+    message(ERROR " gtest not found!")
+endif(NOT GTEST_FOUND)
+include_directories(${GTEST_INCLUDE_DIR})
+
 SET(EXTRA_LIBS ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES} ${GLFW_LIBRARIES} ${SOIL_LIBRARY} ${assimp_LIBRARIES})
+
+
+add_executable(enginimus ${SOURCE_FILES} ${MAIN_FILE})
 target_link_libraries(enginimus ${EXTRA_LIBS})
-
-
-#set(CMAKE_BINARY_DIR ${CMAKE_BINARY_DIR}/bin)
-#set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-
 add_custom_command(TARGET enginimus PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:enginimus>/assets)
 add_custom_command(TARGET enginimus PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:enginimus>/shaders)
+
+enable_testing()
+add_executable(runUnitTests ${SOURCE_FILES} ${TEST_FILES})
+target_link_libraries(runUnitTests ${EXTRA_LIBS} GTest::GTest GTest::Main pthread)
+add_test(
+        NAME runUnitTests
+        COMMAND runUnitTests
+)
